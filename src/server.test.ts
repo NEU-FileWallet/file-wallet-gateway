@@ -8,12 +8,12 @@ it("test server", () => {
     startWSServer();
     const ccp = JSON.parse(
       readFileSync(
-        "/Users/chenjienan/fabric-fs-desktop/test_data/profile.json"
+        "../test_data/profile.json"
       ).toString()
     );
     const identity = JSON.parse(
       readFileSync(
-        "/Users/chenjienan/fabric-fs-desktop/test_data/wallet/gmyx.id"
+        "../test_data/wallet/gmyx.id"
       ).toString()
     );
 

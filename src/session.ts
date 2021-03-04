@@ -14,6 +14,15 @@ interface Request {
   data: any;
 }
 
+function parseResponse(response?: Buffer) {
+  if (!response) return undefined;
+  try {
+    return JSON.parse(response.toString());
+  } catch (error) {
+    return response.toString();
+  }
+}
+
 export class Session {
   private ws: WebSocket;
   alive: boolean = true;
@@ -27,29 +36,40 @@ export class Session {
     this.ws.on("message", async (data) => {
       const cookedData = JSON.parse(data.toString()) as Request;
 
-      let response
+      let response;
 
       const respond = (data: any) => {
-        this.ws.send(
-          JSON.stringify(data)
-        );
-      }
+        this.ws.send(JSON.stringify(data));
+      };
 
       try {
         switch (cookedData.code) {
           case OperationCodeEnum.CONNECT:
             response = await this.connectFabric(cookedData.data);
-            respond({ txID: cookedData.txID, data: response })
-            break
+            respond({ txID: cookedData.txID, data: response });
+            break;
           case OperationCodeEnum.EVALUATE:
-            response = await this.client?.evaluate(cookedData.data.functionName, ...cookedData.data.args)
-            respond({ txID: cookedData.txID, data: response})
-            break
+            response = await this.client?.evaluate(
+              cookedData.data.functionName,
+              ...cookedData.data.args
+            );
+            respond({
+              txID: cookedData.txID,
+              data: parseResponse(response),
+            });
+            break;
           case OperationCodeEnum.SUBMIT:
-            response = await this.client?.submit(cookedData.data.functionName, ...cookedData.data.args)
-            respond({ txID: cookedData.txID, data: response})
+            response = await this.client?.submit(
+              cookedData.data.functionName,
+              ...cookedData.data.args
+            );
+            respond({
+              txID: cookedData.txID,
+              data: parseResponse(response),
+            });
         }
       } catch (error) {
+        console.error(error);
         console.log("fail to process: " + data.toString());
         this.ws.send(
           JSON.stringify({ txID: cookedData.txID, error: error.toString() })

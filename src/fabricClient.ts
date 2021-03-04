@@ -22,7 +22,6 @@ export class FabricClient {
     this.wallet = await Wallets.newInMemoryWallet();
     await this.wallet.put(username, identity);
     await this.connectFabric(username, ccp, channelID);
-
   }
 
   private async connectFabric(username: string, ccp: any, channelID: string) {
@@ -36,17 +35,21 @@ export class FabricClient {
 
     const network = await this.gateway.getNetwork(channelID);
     this.contract = network.getContract("file_wallet");
+    console.log("fabric connected");
   }
 
   evaluate(functionName: string, ...args: string[]) {
+    console.log({ functionName, args });
     return this.contract?.evaluateTransaction(functionName, ...args);
   }
 
   submit(functionName: string, ...args: string[]) {
+    console.log({ functionName, args });
     return this.contract?.submitTransaction(functionName, ...args);
   }
 
   disconnect() {
     this.gateway?.disconnect();
+    console.log("fabric disconnected");
   }
 }
