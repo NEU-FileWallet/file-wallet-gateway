@@ -68,7 +68,7 @@ export class Session {
               data: parseResponse(response),
             });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
         console.log("fail to process: " + data.toString());
         this.ws.send(
